@@ -1,0 +1,23 @@
+方案 A：重新下载一键安装包（推荐，适合本科生）
+打开浏览器，访问 Python 官网下载页：
+https://www.python.org/downloads/windows/
+找一个稳定版本（推荐 3.8.x 或 3.10.x，兼容性最好），点击 Download Windows x86-64 executable installer（64 位）或 x86（32 位）。
+下载完成后，双击运行安装包：
+✅ 一定要勾选 Add Python 3.x to PATH（这一步非常重要，否则后面命令行用不了）
+点击 Install Now（默认安装），等待完成。
+验证安装：
+按 Win + R，输入 cmd 打开命令提示符。
+输入：
+bash
+运行
+python --version
+如果显示类似 Python 3.10.12，就说明安装成功了。
+      安装上位机需要的库
+先关闭这个 Python 窗口，然后按 Win + R，输入 cmd，打开命令提示符（黑窗口）。
+在 cmd 里依次输入下面 3 条命令，每输完一条按回车，等待安装完成：
+
+pip install pyserial
+
+pip install numpy scipy
+
+pip install matplotlib
