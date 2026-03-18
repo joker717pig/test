@@ -1,0 +1,17 @@
+1. GPT无串口输出版本
+C:\1\python\python.exe "c:\Users\Administrator\Documents\WXWork\1688856608744467\Cache\File\2026-03\ppg_gui_stable.py"
+
+2.
+python "c:\Users\Administrator\Documents\WXWork\1688856608744467\Cache\File\2026-03\version2.py"
+
+3.deepseek双向版本
+python c:\Users\Administrator\Documents\WXWork\1688856608744467\Cache\File\2026-03\version1.py
+
+4.
+python c:\Users\Administrator\Documents\WXWork\1688856608744467\Cache\File\2026-03\version3.py
+
+5.扣子双向版本
+python c:\Users\Administrator\Documents\WXWork\1688856608744467\Cache\File\2026-03\version4.py
+
+6.千问双向版本
+python c:\Users\Administrator\Documents\WXWork\1688856608744467\Cache\File\2026-03\version5.py

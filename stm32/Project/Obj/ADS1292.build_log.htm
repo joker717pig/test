@@ -1,0 +1,86 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: μVision V5.26.2.0
+Copyright (C) 2018 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: 铅笔是最幸运的 Administrator, joker, LIC=BUURY-IAZ1U-562Q2-9DZ2I-1SV4V-3BY12
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Plus  Version: 5.38.0.0
+Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.06 update 6 (build 750)
+Assembler:       Armasm.exe V5.06 update 6 (build 750)
+Linker/Locator:  ArmLink.exe V5.06 update 6 (build 750)
+Library Manager: ArmAr.exe V5.06 update 6 (build 750)
+Hex Converter:   FromElf.exe V5.06 update 6 (build 750)
+CPU DLL:         SARMCM3.DLL V5.38.0.0
+Dialog DLL:      DARMSTM.DLL V1.69.1.0
+Target DLL:      UL2CM3.DLL V1.164.8.0
+Dialog DLL:      TARMSTM.DLL V1.67.1.0
+ 
+<h2>Project:</h2>
+C:\Users\Administrator\Desktop\test\stm32\Project\ADS1292.uvprojx
+Project File Date:  03/18/2026
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Build target 'ADS1292'
+compiling MAx30102.c...
+User\MAx30102.c(7): warning:  #223-D: function "I2C_Bus_Init" declared implicitly
+  	I2C_Bus_Init();   //初始化I2C接口
+User\MAx30102.c(8): warning:  #223-D: function "delay_ms" declared implicitly
+  	delay_ms(500);
+User\MAx30102.c(10): warning:  #223-D: function "max30102_int_gpio_init" declared implicitly
+      max30102_int_gpio_init();   //中断引脚配置
+User\MAx30102.c(12): warning:  #223-D: function "max30102_i2c_write" declared implicitly
+  	max30102_i2c_write(MODE_CONFIGURATION,0x40);  //reset the device
+User\MAx30102.c(12): error:  #20: identifier "MODE_CONFIGURATION" is undefined
+  	max30102_i2c_write(MODE_CONFIGURATION,0x40);  //reset the device
+User\MAx30102.c(16): error:  #20: identifier "INTERRUPT_ENABLE1" is undefined
+  	max30102_i2c_write(INTERRUPT_ENABLE1,0xE0);
+User\MAx30102.c(17): error:  #20: identifier "INTERRUPT_ENABLE2" is undefined
+  	max30102_i2c_write(INTERRUPT_ENABLE2,0x00);  //interrupt enable: FIFO almost full flag, new FIFO Data Ready,
+User\MAx30102.c(21): error:  #20: identifier "FIFO_WR_POINTER" is undefined
+  	max30102_i2c_write(FIFO_WR_POINTER,0x00);
+User\MAx30102.c(22): error:  #20: identifier "FIFO_OV_COUNTER" is undefined
+  	max30102_i2c_write(FIFO_OV_COUNTER,0x00);
+User\MAx30102.c(23): error:  #20: identifier "FIFO_RD_POINTER" is undefined
+  	max30102_i2c_write(FIFO_RD_POINTER,0x00);   //clear the pointer
+User\MAx30102.c(25): error:  #20: identifier "FIFO_CONFIGURATION" is undefined
+  	max30102_i2c_write(FIFO_CONFIGURATION,0x4F); //FIFO configuration: sample averaging(4),FIFO rolls on full(0), FIFO almost full value(15 empty data samples when interrupt is issued)  
+User\MAx30102.c(29): error:  #20: identifier "SPO2_CONFIGURATION" is undefined
+  	max30102_i2c_write(SPO2_CONFIGURATION,0x2A); //SpO2 configuration:ACD resolution:15.63pA,sample rate control:200Hz, LED pulse width:215 us 
+User\MAx30102.c(31): error:  #20: identifier "LED1_PULSE_AMPLITUDE" is undefined
+  	max30102_i2c_write(LED1_PULSE_AMPLITUDE,0x2f);	//IR LED
+User\MAx30102.c(32): error:  #20: identifier "LED2_PULSE_AMPLITUDE" is undefined
+  	max30102_i2c_write(LED2_PULSE_AMPLITUDE,0x2f); //RED LED current
+User\MAx30102.c(34): error:  #20: identifier "TEMPERATURE_CONFIG" is undefined
+  	max30102_i2c_write(TEMPERATURE_CONFIG,0x01);   //temp
+User\MAx30102.c(36): warning:  #223-D: function "max30102_i2c_read" declared implicitly
+  	max30102_i2c_read(INTERRUPT_STATUS1,&data,1);
+User\MAx30102.c(36): error:  #20: identifier "INTERRUPT_STATUS1" is undefined
+  	max30102_i2c_read(INTERRUPT_STATUS1,&data,1);
+User\MAx30102.c(37): error:  #20: identifier "INTERRUPT_STATUS2" is undefined
+  	max30102_i2c_read(INTERRUPT_STATUS2,&data,1);  //clear status
+User\MAx30102.c: 5 warnings, 13 errors
+".\Obj\ADS1292.axf" - 13 Error(s), 5 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: Keil
+                https://www.keil.com/pack/Keil.STM32F1xx_DFP.2.4.1.pack
+                Keil.STM32F1xx_DFP.2.4.1
+                STMicroelectronics STM32F1 Series Device Support, Drivers and Examples
+
+<h2>Collection of Component include folders:</h2>
+  .\RTE\_ADS1292
+  C:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.4.1\Device\Include
+
+<h2>Collection of Component Files used:</h2>
+Target not created.
+Build Time Elapsed:  00:00:00
+</pre>
+</body>
+</html>
