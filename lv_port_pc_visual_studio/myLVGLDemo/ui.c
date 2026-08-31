@@ -206,8 +206,8 @@ void ui_init(void)
 
     lv_obj_t* auto_checkbox = lv_checkbox_create(control_card);
     lv_checkbox_set_text(auto_checkbox, "Auto Mode");
-
     lv_obj_set_style_text_color(auto_checkbox, lv_color_hex(0x333333), LV_PART_MAIN);
+
 }
 
 
