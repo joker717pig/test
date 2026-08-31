@@ -208,6 +208,25 @@ void ui_init(void)
     lv_checkbox_set_text(auto_checkbox, "Auto Mode");
     lv_obj_set_style_text_color(auto_checkbox, lv_color_hex(0x333333), LV_PART_MAIN);
 
+    /*============================================================*/
+    lv_obj_t* mode_card = lv_obj_create(content);
+    lv_obj_set_width(mode_card, lv_pct(100));
+    lv_obj_set_height(mode_card, 220);
+    lv_obj_set_style_bg_color(mode_card, lv_color_hex(0xFFFE4B5), 0);
+    lv_obj_get_style_border_width(mode_card, 0, 0);
+    lv_obj_set_style_radius(mode_card, 16, 0);
+    lv_obj_set_style_pad_all(mode_card, 14, 0);
+    lv_obj_remove_flag(mode_card, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_layout(mode_card, LV_LAYOUT_FLEX);
+    lv_obj_set_flex_flow(mode_card, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(mode_card, 12, 0);
+
+    lv_obj_t* mode_title =lv_label_create(mode_card);
+    lv_label_set_text(  mode_title, "Mode Settings" );
+    lv_obj_set_style_text_font( mode_title, &lv_font_montserrat_16, 0);
+    lv_obj_set_style_text_color( mode_title,lv_color_hex(0xFFA500), 0);
+
+
 }
 
 
