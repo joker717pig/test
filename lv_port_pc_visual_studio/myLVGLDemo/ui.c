@@ -213,7 +213,7 @@ void ui_init(void)
     lv_obj_set_width(mode_card, lv_pct(100));
     lv_obj_set_height(mode_card, 220);
     lv_obj_set_style_bg_color(mode_card, lv_color_hex(0xFFFE4B5), 0);
-    lv_obj_get_style_border_width(mode_card, 0, 0);
+    lv_obj_set_style_border_width(mode_card, 0, 0);
     lv_obj_set_style_radius(mode_card, 16, 0);
     lv_obj_set_style_pad_all(mode_card, 14, 0);
     lv_obj_remove_flag(mode_card, LV_OBJ_FLAG_SCROLLABLE);
@@ -226,6 +226,38 @@ void ui_init(void)
     lv_obj_set_style_text_font( mode_title, &lv_font_montserrat_16, 0);
     lv_obj_set_style_text_color( mode_title,lv_color_hex(0xFFA500), 0);
 
+    lv_obj_t* mode_row = lv_obj_create(mode_card);
+    lv_obj_set_width(mode_row, lv_pct(100));
+    lv_obj_set_height(mode_row, 42);
+    lv_obj_set_style_bg_opa(mode_row, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(mode_row, 0, 0);
+    lv_obj_set_style_pad_all(mode_row, 0, 0);
+    lv_obj_remove_flag(mode_row, LV_OBJ_FLAG_SCROLLABLE);
+    //横向排列
+    lv_obj_set_layout(mode_row, LV_LAYOUT_FLEX);
+    lv_obj_set_flex_flow(mode_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(mode_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    //创建文字
+    lv_obj_t* mode_label = lv_label_create(mode_row);
+    lv_label_set_text(mode_label, "Work Mode");
+    lv_obj_set_style_text_color(mode_label, lv_color_hex(0x333333), 0);
+    //创建Dropdown
+    lv_obj_t* mode_dropdown = lv_dropdown_create(mode_row);
+    lv_obj_set_width(mode_dropdown, 140);
+    lv_dropdown_set_options(mode_dropdown, "Automatic\nManual\nSleep");
+    lv_dropdown_set_selected(mode_dropdown, 0); //默认选择第一个选项
+    lv_obj_set_style_radius(mode_dropdown, 10, LV_PART_MAIN);
+    lv_obj_t* speed_label = lv_label_create(mode_card);
+    lv_label_set_text(speed_label, "Fan Speed");
+    lv_obj_set_style_text_color(speed_label, lv_color_hex(0x333333), 0);
+    //创建Roller(更适合在相邻的值做选择)
+    lv_obj_t* speed_roller = lv_roller_create(mode_card);
+    lv_roller_set_options(speed_roller, "Low\nMedium\nHigh", LV_ROLLER_MODE_NORMAL);//普通滚动
+    lv_obj_set_width(speed_roller, 160);
+    lv_obj_set_style_radius(speed_roller, 10, LV_PART_MAIN);
+    lv_roller_set_visible_row_count(speed_roller, 3);
+    lv_roller_set_selected(speed_roller, 1, LV_ANIM_OFF); //默认选择第二个选项
+    uint32_t selected = lv_dropdown_get_selected(mode_dropdown);
 
 }
 
