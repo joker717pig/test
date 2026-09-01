@@ -3519,6 +3519,15 @@
     <ClCompile Include="..\..\assets\my_logo.c">
       <Filter>assets</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\assets\img_humidity.c">
+      <Filter>assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\assets\img_temperature.c">
+      <Filter>assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ui_font_cn_20.c">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="freetype">
@@ -4744,6 +4753,9 @@
     </Filter>
     <Filter Include="assets">
       <UniqueIdentifier>{3ed4b0bc-bb57-4323-a1d4-eec9c6668da8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{c097d1d4-017e-4f70-91f7-64a58496e0da}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

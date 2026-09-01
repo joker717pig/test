@@ -3276,7 +3276,10 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
+    <ClCompile Include="..\..\assets\img_humidity.c" />
+    <ClCompile Include="..\..\assets\img_temperature.c" />
     <ClCompile Include="..\..\assets\my_logo.c" />
+    <ClCompile Include="..\..\source\ui_font_cn_20.c" />
     <ClCompile Include="..\myLVGLDemo\event.c" />
     <ClCompile Include="..\myLVGLDemo\ui.c" />
     <ClCompile Include="..\myLVGLDemo\ui_func.c" />

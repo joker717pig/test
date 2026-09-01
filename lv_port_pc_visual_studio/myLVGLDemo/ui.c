@@ -1,6 +1,12 @@
 ﻿#include "ui.h"
 #include "lvgl.h"
 
+LV_IMAGE_DECLARE(my_logo);
+LV_IMAGE_DECLARE(img_temperature);
+LV_IMAGE_DECLARE(img_humidity);
+
+LV_FONT_DECLARE(ui_font_cn_20);
+
 static void btn_event_cb(lv_event_t* e);
 static void slider_event_cb(lv_event_t* e);
 
@@ -53,6 +59,12 @@ void ui_init(void)
     lv_obj_set_style_text_font(title, &lv_font_montserrat_28,0);
     lv_obj_align(title, LV_ALIGN_TOP_LEFT, 0, 0);
 
+    //创建logo图片
+    //lv_obj_t* logo = lv_image_create(page);
+    //lv_image_set_src(logo, &my_logo);
+    //lv_image_set_scale(logo, 128); //缩小为原来的50%
+    //lv_obj_align(logo, LV_ALIGN_TOP_RIGHT, 0, 0);
+
     lv_obj_t* temperature_card = lv_obj_create(top_row);
     lv_obj_set_height(temperature_card, 110);
     lv_obj_set_flex_grow(temperature_card, 1);
@@ -63,10 +75,15 @@ void ui_init(void)
     lv_obj_remove_flag(temperature_card, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t* name_label = lv_label_create(temperature_card);
-    lv_label_set_text(name_label, "Temperature");
+    lv_label_set_text(name_label, "温度");
     lv_obj_set_style_text_color(name_label, lv_color_hex(0xFFA500), 0);
-    lv_obj_set_style_text_font(name_label, &lv_font_montserrat_16, 0);
+    lv_obj_set_style_text_font(name_label, &ui_font_cn_20, 0);
     lv_obj_align(name_label, LV_ALIGN_TOP_LEFT, 0, 0);
+    //增加温度图标
+    lv_obj_t* temperature_icon = lv_image_create(temperature_card);
+    lv_image_set_src(temperature_icon, &img_temperature);
+    lv_obj_align(temperature_icon, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_image_set_scale(temperature_icon, 200);
 
     lv_obj_t* value_label = lv_label_create(temperature_card);
     lv_label_set_text(value_label, "25.6 C");
@@ -94,6 +111,11 @@ void ui_init(void)
     lv_obj_set_style_text_color(name_label1, lv_color_hex(0xFFA500), 0);
     lv_obj_set_style_text_font(name_label1, &lv_font_montserrat_16, 0);
     lv_obj_align(name_label1, LV_ALIGN_TOP_LEFT, 0, 0);
+    //增加湿度图标
+    lv_obj_t* humidity_icon = lv_image_create(humidity_card);
+    lv_image_set_src(humidity_icon, &img_humidity);
+    lv_obj_align(humidity_icon, LV_ALIGN_TOP_RIGHT, 0, -2);
+    lv_image_set_scale(humidity_icon, 200);
 
     lv_obj_t* value_label1 = lv_label_create(humidity_card);
     lv_label_set_text(value_label1, "70%");
@@ -199,11 +221,10 @@ void ui_init(void)
     lv_obj_t* fan_label = lv_label_create(fan_row);
     lv_label_set_text(fan_label, "Fan");
     lv_obj_set_style_text_color(fan_label, lv_color_hex(0x333333), 0);
-
+    //Switch控件/Checkbox控件 布尔状态
     lv_obj_t* fan_swith = lv_switch_create(fan_row);  //加入开关键
     lv_obj_set_size(fan_swith, 50, 26);
     lv_obj_add_state(fan_swith, LV_STATE_CHECKED); //默认开启状态
-
     lv_obj_t* auto_checkbox = lv_checkbox_create(control_card);
     lv_checkbox_set_text(auto_checkbox, "Auto Mode");
     lv_obj_set_style_text_color(auto_checkbox, lv_color_hex(0x333333), LV_PART_MAIN);
@@ -252,12 +273,49 @@ void ui_init(void)
     lv_obj_set_style_text_color(speed_label, lv_color_hex(0x333333), 0);
     //创建Roller(更适合在相邻的值做选择)
     lv_obj_t* speed_roller = lv_roller_create(mode_card);
-    lv_roller_set_options(speed_roller, "Low\nMedium\nHigh", LV_ROLLER_MODE_NORMAL);//普通滚动
+    lv_roller_set_options(speed_roller, "Low\nMedium\nHigh", LV_ROLLER_MODE_NORMAL);//普通滚动（不循环） 
     lv_obj_set_width(speed_roller, 160);
     lv_obj_set_style_radius(speed_roller, 10, LV_PART_MAIN);
     lv_roller_set_visible_row_count(speed_roller, 3);
     lv_roller_set_selected(speed_roller, 1, LV_ANIM_OFF); //默认选择第二个选项
     uint32_t selected = lv_dropdown_get_selected(mode_dropdown);
+
+    lv_obj_t* input_card = lv_obj_create(content);
+    lv_obj_set_width(input_card, lv_pct(100));
+    lv_obj_set_height(input_card, 220);
+    lv_obj_set_style_bg_color(input_card, lv_color_hex(0xFFE4B5), 0);
+    lv_obj_set_style_border_width(input_card, 0, 0);
+    lv_obj_set_style_radius(input_card, 16, 0);
+    lv_obj_set_style_pad_all(input_card, 14, 0);
+    //上下排列
+    lv_obj_set_layout(input_card, LV_LAYOUT_FLEX);
+    lv_obj_set_flex_flow(input_card, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(input_card, 12, 0);//设置行间距
+    lv_obj_t* input_title = lv_label_create(input_card);
+    lv_label_set_text(input_title, "Device Settings");
+    lv_obj_set_style_text_font(input_title, &lv_font_montserrat_16, 0);
+    lv_obj_t* name_label2 = lv_label_create(input_card);
+    lv_label_set_text(name_label2, "Device Name");
+    //创建textarea
+    lv_obj_t* name_textarea = lv_textarea_create(input_card);
+    lv_obj_set_width(name_textarea, 300);
+    lv_obj_set_height(name_textarea, 45);
+    lv_textarea_set_text(name_textarea, "My Device");
+    lv_textarea_set_max_length(name_textarea, 20);
+    lv_obj_t* password_label = lv_label_create(input_card);
+    lv_label_set_text(password_label, "Password");
+    lv_obj_t* password_textarea = lv_textarea_create(input_card);
+    lv_obj_set_width(password_textarea, 300);
+    lv_obj_set_height(password_textarea, 45);
+    lv_textarea_set_text(password_textarea, "123456");
+    lv_textarea_set_password_mode(password_textarea, true);//设置为密码模式
+
+    //添加键盘
+    lv_obj_t* keyboard = lv_keyboard_create(lv_screen_active());
+    lv_obj_set_size(keyboard, 480, 120);
+    lv_obj_align(keyboard, LV_ALIGN_BOTTOM_MID, 0, 0);
+    //绑定输入框和键盘
+    lv_keyboard_set_textarea(keyboard, name_textarea);
 
 }
 
