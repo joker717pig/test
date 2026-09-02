@@ -9,10 +9,19 @@ LV_FONT_DECLARE(ui_font_cn_20);
 
 static void btn_event_cb(lv_event_t* e);
 static void slider_event_cb(lv_event_t* e);
+static void ui_style_init(void);
+
+static lv_style_t style_card;
+static lv_style_t style_section_title;
+static lv_style_t style_value;
+static lv_style_t style_button;
+static lv_style_t style_button_pressed;
 
 
 void ui_init(void)
 {
+    ui_style_init();
+
     lv_obj_t* screen = lv_screen_active();
     lv_obj_set_style_bg_color(screen, lv_color_hex(0xFFFFE0), LV_PART_MAIN);
     lv_obj_t* page = lv_obj_create(screen);
@@ -20,7 +29,7 @@ void ui_init(void)
     lv_obj_center(page);
     lv_obj_set_style_border_width(page, 0, 0);
     lv_obj_set_style_radius(page, 0, 0);
-    lv_obj_set_style_bg_color(page, lv_color_hex(0xFFB6C1), 0);
+    lv_obj_set_style_bg_color(page, lv_color_hex(0xF3D5DD), 0);
     lv_obj_set_style_pad_all(page, 20, 0);
     //lv_obj_remove_flag(page, LV_OBJ_FLAG_SCROLLABLE); //禁止滚动
     lv_obj_set_scrollbar_mode(page, LV_SCROLLBAR_MODE_AUTO);
@@ -59,25 +68,16 @@ void ui_init(void)
     lv_obj_set_style_text_font(title, &lv_font_montserrat_28,0);
     lv_obj_align(title, LV_ALIGN_TOP_LEFT, 0, 0);
 
-    //创建logo图片
-    //lv_obj_t* logo = lv_image_create(page);
-    //lv_image_set_src(logo, &my_logo);
-    //lv_image_set_scale(logo, 128); //缩小为原来的50%
-    //lv_obj_align(logo, LV_ALIGN_TOP_RIGHT, 0, 0);
 
     lv_obj_t* temperature_card = lv_obj_create(top_row);
+    lv_obj_add_style(temperature_card, &style_card, LV_PART_MAIN);
     lv_obj_set_height(temperature_card, 110);
     lv_obj_set_flex_grow(temperature_card, 1);
-    //lv_obj_align(temperature_card, LV_ALIGN_TOP_LEFT, 0, 50);
-    lv_obj_set_style_bg_color(temperature_card, lv_color_hex(0xFFE4B5), 0);
-    lv_obj_set_style_border_width(temperature_card, 0, 0);
-    lv_obj_set_style_radius(temperature_card, 16, 0);
     lv_obj_remove_flag(temperature_card, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t* name_label = lv_label_create(temperature_card);
-    lv_label_set_text(name_label, "温度");
-    lv_obj_set_style_text_color(name_label, lv_color_hex(0xFFA500), 0);
-    lv_obj_set_style_text_font(name_label, &ui_font_cn_20, 0);
+    lv_label_set_text(name_label, "Temperature");
+    lv_obj_add_style(name_label, &style_section_title, LV_PART_MAIN);
     lv_obj_align(name_label, LV_ALIGN_TOP_LEFT, 0, 0);
     //增加温度图标
     lv_obj_t* temperature_icon = lv_image_create(temperature_card);
@@ -87,8 +87,7 @@ void ui_init(void)
 
     lv_obj_t* value_label = lv_label_create(temperature_card);
     lv_label_set_text(value_label, "25.6 C");
-    lv_obj_set_style_text_font(value_label, &lv_font_montserrat_28, 0);
-    lv_obj_set_style_text_color(value_label, lv_color_hex(0xFFB5C5), 0);
+    lv_obj_add_style(value_label, &style_section_title, LV_PART_MAIN);
     lv_obj_align(value_label, LV_ALIGN_BOTTOM_MID, 0, -20);
 
     lv_obj_t* status_label = lv_label_create(temperature_card);
@@ -98,18 +97,14 @@ void ui_init(void)
 
     /*======================================*/
     lv_obj_t* humidity_card = lv_obj_create(top_row);
+    lv_obj_add_style(humidity_card, &style_card, LV_PART_MAIN);
     lv_obj_set_height(humidity_card, 110);
     lv_obj_set_flex_grow(humidity_card, 1);
-    // lv_obj_align(humidity_card,LV_ALIGN_TOP_RIGHT,0,50);
-    lv_obj_set_style_bg_color(humidity_card, lv_color_hex(0xFFE4B5), 0);
-    lv_obj_set_style_border_width(humidity_card, 0, 0);
-    lv_obj_set_style_radius(humidity_card, 16, 0);
     lv_obj_remove_flag(humidity_card, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t* name_label1 = lv_label_create(humidity_card);
     lv_label_set_text(name_label1, "Humidity");
-    lv_obj_set_style_text_color(name_label1, lv_color_hex(0xFFA500), 0);
-    lv_obj_set_style_text_font(name_label1, &lv_font_montserrat_16, 0);
+    lv_obj_add_style(name_label1, &style_section_title, LV_PART_MAIN);
     lv_obj_align(name_label1, LV_ALIGN_TOP_LEFT, 0, 0);
     //增加湿度图标
     lv_obj_t* humidity_icon = lv_image_create(humidity_card);
@@ -119,8 +114,7 @@ void ui_init(void)
 
     lv_obj_t* value_label1 = lv_label_create(humidity_card);
     lv_label_set_text(value_label1, "70%");
-    lv_obj_set_style_text_font(value_label1, &lv_font_montserrat_28, 0);
-    lv_obj_set_style_text_color(value_label1, lv_color_hex(0xFFB5C5), 0);
+    lv_obj_add_style(value_label1, &style_section_title, LV_PART_MAIN);
     lv_obj_align(value_label1, LV_ALIGN_BOTTOM_MID, 0, -20);
 
     lv_obj_t* status_label1 = lv_label_create(humidity_card);
@@ -142,32 +136,28 @@ void ui_init(void)
     lv_obj_set_flex_align(bottom_row, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     /*=================================================*/
     lv_obj_t* start_btn = lv_button_create(bottom_row);
+    lv_obj_add_style(start_btn, &style_button, LV_PART_MAIN);
+    lv_obj_add_style(start_btn, &style_button_pressed, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_height(start_btn, 110);
     lv_obj_set_flex_grow(start_btn, 1);
     lv_obj_t* start_label = lv_label_create(start_btn);
     lv_label_set_text(start_label, "START");
     lv_obj_center(start_label);
-    lv_obj_set_style_bg_color(start_btn, lv_color_hex(0xEE9A49), LV_PART_MAIN);
-    lv_obj_set_style_radius(start_btn, 12, LV_PART_MAIN);
     lv_obj_set_style_text_color(start_label, lv_color_hex(0xFFFFFF), 0);
-    lv_obj_set_style_bg_color(start_btn, lv_color_hex(0xEE3B3B), LV_STATE_PRESSED);
     lv_obj_add_event_cb(start_btn, btn_event_cb, LV_EVENT_CLICKED, start_label);
 
 
     /*===================================================*/
     lv_obj_t* brightness_card = lv_obj_create(bottom_row);
+    lv_obj_add_style(brightness_card, &style_card, LV_PART_MAIN);
     lv_obj_set_height(brightness_card, 110);
     lv_obj_set_flex_grow(brightness_card, 1);
-    lv_obj_set_style_radius(brightness_card, 16, 0);
     lv_obj_remove_flag(brightness_card, LV_OBJ_FLAG_SCROLLABLE);
-    //lv_obj_align(brightness_card, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
-    lv_obj_set_style_border_width(brightness_card, 0, 0);
-    lv_obj_set_style_bg_color(brightness_card, lv_color_hex(0xFFE4B5), 0);
+  
 
     lv_obj_t* brightness_label = lv_label_create(brightness_card);
     lv_label_set_text(brightness_label, "Brightness");
-    lv_obj_set_style_text_color(brightness_label, lv_color_hex(0xFFA500), 0);
-    lv_obj_set_style_text_font(brightness_label, &lv_font_montserrat_16, 0);
+    lv_obj_add_style(brightness_label, &style_section_title, LV_PART_MAIN);
     lv_obj_align(brightness_label, LV_ALIGN_TOP_LEFT, 0, 0);
     lv_obj_set_style_pad_all(brightness_card, 12, 0);
 
@@ -178,6 +168,9 @@ void ui_init(void)
     lv_bar_set_value(brightness_bar, 80, LV_ANIM_OFF);
 
     lv_obj_t* brightness_slider = lv_slider_create(brightness_card);
+    lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(0xDDD8D5), 0);
+    lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(0xE9954E), LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(0xE9954E), LV_PART_KNOB);
     lv_obj_set_size(brightness_slider, 160, 15);
     lv_obj_align(brightness_slider, LV_ALIGN_TOP_LEFT, 0, 42);
     //lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(0xEE9A49), 0);
@@ -191,12 +184,9 @@ void ui_init(void)
 
     /*=========================================================================*/
     lv_obj_t* control_card = lv_obj_create(content);
+    lv_obj_add_style(control_card, &style_card, LV_PART_MAIN);
     lv_obj_set_width(control_card, lv_pct(100));
     lv_obj_set_height(control_card, 150);
-    lv_obj_set_style_bg_color(control_card, lv_color_hex(0xFFE4B5), 0);
-    lv_obj_set_style_border_width(control_card, 0, 0);
-    lv_obj_set_style_radius(control_card, 16, 0);
-    lv_obj_set_style_pad_all(control_card, 14, 0);
     lv_obj_remove_flag(control_card, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_layout(control_card, LV_LAYOUT_FLEX);
     lv_obj_set_flex_flow(control_card, LV_FLEX_FLOW_COLUMN);
@@ -204,8 +194,7 @@ void ui_init(void)
 
     lv_obj_t* control_title = lv_label_create(control_card);
     lv_label_set_text(control_title, "Device Control");
-    lv_obj_set_style_text_font(control_title, &lv_font_montserrat_16, 0);
-    lv_obj_set_style_text_color(control_title, lv_color_hex(0xFFA500), 0);
+    lv_obj_add_style(control_title, &style_section_title, LV_PART_MAIN);
 
     lv_obj_t* fan_row = lv_obj_create(control_card);
     lv_obj_set_width(fan_row, lv_pct(100));
@@ -224,6 +213,8 @@ void ui_init(void)
     //Switch控件/Checkbox控件 布尔状态
     lv_obj_t* fan_swith = lv_switch_create(fan_row);  //加入开关键
     lv_obj_set_size(fan_swith, 50, 26);
+    lv_obj_set_style_bg_color(fan_swith, lv_color_hex(0xE9954E), LV_PART_INDICATOR|LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(fan_swith, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
     lv_obj_add_state(fan_swith, LV_STATE_CHECKED); //默认开启状态
     lv_obj_t* auto_checkbox = lv_checkbox_create(control_card);
     lv_checkbox_set_text(auto_checkbox, "Auto Mode");
@@ -231,12 +222,9 @@ void ui_init(void)
 
     /*============================================================*/
     lv_obj_t* mode_card = lv_obj_create(content);
+    lv_obj_add_style(mode_card, &style_card, LV_PART_MAIN);
     lv_obj_set_width(mode_card, lv_pct(100));
     lv_obj_set_height(mode_card, 220);
-    lv_obj_set_style_bg_color(mode_card, lv_color_hex(0xFFFE4B5), 0);
-    lv_obj_set_style_border_width(mode_card, 0, 0);
-    lv_obj_set_style_radius(mode_card, 16, 0);
-    lv_obj_set_style_pad_all(mode_card, 14, 0);
     lv_obj_remove_flag(mode_card, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_layout(mode_card, LV_LAYOUT_FLEX);
     lv_obj_set_flex_flow(mode_card, LV_FLEX_FLOW_COLUMN);
@@ -281,12 +269,9 @@ void ui_init(void)
     uint32_t selected = lv_dropdown_get_selected(mode_dropdown);
 
     lv_obj_t* input_card = lv_obj_create(content);
+    lv_obj_add_style(input_card, &style_card, LV_PART_MAIN);
     lv_obj_set_width(input_card, lv_pct(100));
     lv_obj_set_height(input_card, 220);
-    lv_obj_set_style_bg_color(input_card, lv_color_hex(0xFFE4B5), 0);
-    lv_obj_set_style_border_width(input_card, 0, 0);
-    lv_obj_set_style_radius(input_card, 16, 0);
-    lv_obj_set_style_pad_all(input_card, 14, 0);
     //上下排列
     lv_obj_set_layout(input_card, LV_LAYOUT_FLEX);
     lv_obj_set_flex_flow(input_card, LV_FLEX_FLOW_COLUMN);
@@ -319,6 +304,38 @@ void ui_init(void)
 
 }
 
+static void ui_style_init(void)
+{
+    //卡片样式
+    lv_style_init(&style_card);
+    lv_style_set_bg_color(&style_card, lv_color_hex(0xFFF6E5));
+    lv_style_set_border_width(&style_card, 0);
+    lv_style_set_radius(&style_card, 16);
+    lv_style_set_pad_all(&style_card, 14);
+
+    //标题样式
+    lv_style_init(&style_section_title);
+    lv_style_set_text_color(&style_section_title, lv_color_hex(0xD9843D));
+    lv_style_set_text_font(&style_section_title, &lv_font_montserrat_16);
+
+    //数值样式
+    lv_style_init(&style_value);
+    lv_style_set_text_color(&style_value, lv_color_hex(0xD982A6));
+    lv_style_set_text_font(&style_value, &lv_font_montserrat_28);
+
+    //按钮样式
+    lv_style_init(&style_button);
+    lv_style_set_bg_color(&style_button, lv_color_hex(0xE9954E));
+    lv_style_set_border_width(&style_button, 0);
+    lv_style_set_radius(&style_button, 16);
+
+    //按钮按下样式
+    lv_style_init(&style_button_pressed);
+    lv_style_set_bg_color(&style_button_pressed, lv_color_hex(0xCF7432));
+
+
+
+}
 
 
 /*=========================================================================*/
