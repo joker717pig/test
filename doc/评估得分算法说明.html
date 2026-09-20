@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>盆底评估（Glazer 协议）得分算法说明</title>
+<style>
+  :root {
+    --c-bg: #f7f8fa;
+    --c-card: #ffffff;
+    --c-text: #24292f;
+    --c-muted: #57606a;
+    --c-border: #d0d7de;
+    --c-accent: #0969da;
+    --c-accent-bg: #ddf4ff;
+    --c-th-bg: #f6f8fa;
+    --c-warn: #9a6700;
+    --c-warn-bg: #fff8c5;
+    --c-ok: #1a7f37;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    color: var(--c-text);
+    background: var(--c-bg);
+    margin: 0;
+    padding: 24px 16px 64px;
+    line-height: 1.7;
+  }
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  header.doc-header {
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  header.doc-header h1 {
+    margin: 0 0 8px;
+    font-size: 26px;
+    line-height: 1.3;
+  }
+  header.doc-header .meta {
+    color: var(--c-muted);
+    font-size: 13px;
+  }
+  header.doc-header .meta p { margin: 2px 0; }
+  header.doc-header code {
+    background: var(--c-th-bg);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+  }
+  section {
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    padding: 20px 28px;
+    margin-bottom: 20px;
+  }
+  h2 {
+    font-size: 19px;
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--c-border);
+  }
+  h3 { font-size: 16px; margin: 20px 0 10px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0; padding-left: 24px; }
+  li { margin: 4px 0; }
+  code {
+    font-family: "SF Mono", "Cascadia Code", Consolas, "Courier New", monospace;
+    background: var(--c-th-bg);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+  }
+  pre {
+    background: #0d1117;
+    color: #c9d1d9;
+    border-radius: 8px;
+    padding: 14px 18px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0;
+    font-size: 13.5px;
+  }
+  th, td {
+    border: 1px solid var(--c-border);
+    padding: 7px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--c-th-bg); font-weight: 600; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  .callout {
+    border-left: 4px solid var(--c-accent);
+    background: var(--c-accent-bg);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 14px 0;
+  }
+  .callout.warn {
+    border-left-color: #d4a72c;
+    background: var(--c-warn-bg);
+  }
+  .callout p { margin: 4px 0; }
+  .small { font-size: 12.5px; color: var(--c-muted); }
+  .tag {
+    display: inline-block;
+    background: var(--c-accent-bg);
+    color: var(--c-accent);
+    border-radius: 999px;
+    padding: 1px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="doc-header">
+  <h1>盆底评估（Glazer 协议）得分算法说明</h1>
+  <div class="meta">
+    <p>版本：2026-08-31 · 目标读者：熟悉盆底肌电评估 / 生物反馈评分的临床或算法专家（用于评审与改进建议）</p>
+    <p>代码位置（ESP32 端）：<code>main/therapy/therapy_eval.c</code> / <code>.h</code>（评估状态机 + 指标计算 + 评分）、<code>main/dsp/emg_dsp.c</code> / <code>emg_force.c</code>（信号处理与力度包络）、<code>main/ui_page_cn/PelFlo_AssPage/</code>（评估页 UI 与报告页）</p>
+    <p>临床依据来源：<code>EDA_EMG/doc/治疗处方/利玮生物刺激反馈仪处方2026052501.md</code></p>
+  </div>
+</header>
+
+<section>
+  <h2>0. 一句话总结</h2>
+  <p>按 <strong>Glazer 4 阶段方案</strong>（前静息 → 快速收缩 → 持续收缩 → 后静息）采集盆底肌电的
+  <strong>力度包络（µV）</strong>，以<strong>前静息均值作为个人基线做相对标定</strong>，算出 6 个分项得分
+  （各 0~100），再<strong>加权求和</strong>得到总分（0~100）。</p>
+</section>
+
+<section>
+  <h2>1. 硬件与信号链路</h2>
+  <table>
+    <tr><th>项</th><th>值</th></tr>
+    <tr><td>硬件</td><td>ESP32-S3 主板 + ADS1292 生物电前端（24bit ADC）</td></tr>
+    <tr><td>采样率</td><td>500 SPS（本次评估固定）</td></tr>
+    <tr><td>电极</td><td>单通道 CH1（盆底肌）</td></tr>
+  </table>
+  <p>信号处理链（逐样本递推，无 FFT）：</p>
+  <pre>raw16 ─► 高通 25Hz ─► 陷波 50Hz(Q30) ─► 低通 150Hz ─► 整流 + EMA(4Hz) ─► 力度包络</pre>
+  <ul>
+    <li>力度包络 = 评估用的"肌电幅度"信号，单位换算 <strong>1 LSB ≈ 6.15 µV</strong>（VREF=2.42V、增益 12）。</li>
+    <li>评估引擎每 <strong>50ms 采样一次</strong>包络（即 20 样本/秒），既保证上升/恢复时间的分辨率，又降低计算量。</li>
+  </ul>
+</section>
+
+<section>
+  <h2>2. 评估流程（4 阶段，总时长 272s ≈ 4:32）</h2>
+  <table>
+    <tr><th>#</th><th>阶段</th><th>动作序列</th><th>时长</th><th>阶段内指标</th></tr>
+    <tr><td>①</td><td>前静息期</td><td>放松 10s × 2</td><td>20s</td><td>平均值、变异性</td></tr>
+    <tr><td>②</td><td>快速收缩期</td><td>(用力 10s + 放松 10s) × 5</td><td>100s</td><td>最大值、上升时间、恢复时间</td></tr>
+    <tr><td>③</td><td>持续收缩期</td><td>(放松 2s + 用力保持 8s + 放松 12s) × 6</td><td>132s</td><td>平均值、变异性</td></tr>
+    <tr><td>④</td><td>后静息期</td><td>放松 10s × 2</td><td>20s</td><td>平均值、变异性</td></tr>
+  </table>
+  <div class="callout"><p>每个动作步骤都有对应语音提示（"放松"/"用力"/"保持"）和屏幕三角峰/基线示意图引导。</p></div>
+</section>
+
+<section>
+  <h2>3. 数据采集与指标</h2>
+  <h3>3.1 相对标定（关键设计）</h3>
+  <ul>
+    <li><strong>基线 baseline = 前静息期包络均值</strong>（µV）。</li>
+    <li>力量/耐力都用 <strong>"相对基线的倍数"</strong> 表示，<strong>不依赖绝对 µV</strong>，以消除个体差异与电极位置差异。</li>
+  </ul>
+  <h3>3.2 各阶段算出的原始指标</h3>
+  <table>
+    <tr><th>阶段</th><th>指标</th><th>含义 / 计算</th></tr>
+    <tr><td>① 前静息</td><td><code>rest1_avg</code></td><td>包络均值 (µV)</td></tr>
+    <tr><td>① 前静息</td><td><code>rest1_var</code></td><td>变异性 CV% = std / mean × 100</td></tr>
+    <tr><td>② 快速收缩</td><td><code>fast_max</code></td><td>5 次用力峰值中的<strong>最大者</strong> (µV)</td></tr>
+    <tr><td>② 快速收缩</td><td><code>fast_max_ratio</code></td><td>= fast_max / baseline（倍数）</td></tr>
+    <tr><td>② 快速收缩</td><td><code>fast_rise</code></td><td>平均<strong>上升时间</strong> (s)：包络首超阈值 → 峰值</td></tr>
+    <tr><td>② 快速收缩</td><td><code>fast_recover</code></td><td>平均<strong>恢复时间</strong> (s)：峰值 → 回落阈值</td></tr>
+    <tr><td>③ 持续收缩</td><td><code>sust_avg</code></td><td>保持段包络均值 (µV)</td></tr>
+    <tr><td>③ 持续收缩</td><td><code>sust_ratio</code></td><td>= sust_avg / baseline（倍数）</td></tr>
+    <tr><td>③ 持续收缩</td><td><code>sust_var</code></td><td>保持段变异性 CV%</td></tr>
+    <tr><td>④ 后静息</td><td><code>rest2_avg</code> / <code>rest2_var</code></td><td>同前静息</td></tr>
+  </table>
+  <p><strong>上升/恢复时间的检测阈值</strong>：<code>阈值 = max(2 × baseline, 10 µV)</code>。
+  每次用力段内做状态机：<code>未触发 → 首超阈值(记上升起点) → 到峰值 → 回落阈值(记恢复)</code>。</p>
+  <p><strong>变异性 CV%</strong> 计算：<code>CV% = sqrt(E[x²] - E[x]²) / E[x] × 100</code>；
+  若均值 &lt; 0.5 µV，直接记 0（视为"无有效信号，按完美稳定处理"）。</p>
+</section>
+
+<section>
+  <h2>4. 评分算法</h2>
+  <h3>4.1 两个"是否真的做了"的门槛</h3>
+  <ul>
+    <li><code>has_force</code>：快速收缩峰值 <code>fast_max_ratio ≥ 2.0</code>（即峰值 ≥ 2 倍基线）才算"真的用力"。</li>
+    <li><code>has_sust</code>：持续收缩保持均值 <code>sust_ratio ≥ 1.5</code> 才算"真的保持"。</li>
+  </ul>
+  <div class="callout warn"><p><strong>目的</strong>：未真正收缩/保持时，力量、速度、耐力、保持稳定直接记 0 分，
+  避免"全程静止却因 0s 上升时间 / 低 CV 拿高分"。</p></div>
+  <h3>4.2 六个分项（各 0~100）</h3>
+  <table>
+    <tr><th>分项</th><th>权重</th><th>公式</th><th>满分条件</th><th>零分条件</th></tr>
+    <tr><td>力量</td><td>25%</td><td><code>has_force ? clamp01(fast_max_ratio / 10) × 100 : 0</code></td><td>峰值 ≥ 10×基线</td><td>峰值 ≤ 基线（或未收缩）</td></tr>
+    <tr><td>耐力</td><td>25%</td><td><code>has_sust ? clamp01(sust_ratio / 5) × 100 : 0</code></td><td>保持均值 ≥ 5×基线</td><td>保持均值 ≤ 基线（或未保持）</td></tr>
+    <tr><td>上升速度</td><td>10%</td><td><code>has_force ? lin(fast_rise, 0.5s, 2s) : 0</code></td><td>≤ 0.5s</td><td>≥ 2s</td></tr>
+    <tr><td>恢复速度</td><td>10%</td><td><code>has_force ? lin(fast_recover, 1s, 3s) : 0</code></td><td>≤ 1s</td><td>≥ 3s</td></tr>
+    <tr><td>静息稳定</td><td>15%</td><td><code>lin((rest1_var + rest2_var)/2, 10%, 30%)</code></td><td>平均 CV% ≤ 10%</td><td>≥ 30%</td></tr>
+    <tr><td>保持稳定</td><td>15%</td><td><code>has_sust ? lin(sust_var, 10%, 30%) : 0</code></td><td>CV% ≤ 10%</td><td>≥ 30%</td></tr>
+  </table>
+  <p>其中：</p>
+  <ul>
+    <li><code>clamp01(x)</code>：把 x 截断到 [0, 1]。</li>
+    <li><code>lin(v, full, zero) = clamp01((zero − v) / (zero − full)) × 100</code>：v ≤ full 得 100 分，v ≥ zero 得 0 分，中间线性。</li>
+  </ul>
+  <h3>4.3 总分</h3>
+  <pre>总分 = 力量×0.25 + 耐力×0.25 + 上升×0.10 + 恢复×0.10 + 静息稳定×0.15 + 保持稳定×0.15</pre>
+  <p class="small">（权重合计 1.00，总分 0~100）</p>
+</section>
+
+<section>
+  <h2>5. 报告页呈现</h2>
+  <p>报告页表格 9 行（列：参数名称 / 参考值 / 测试结果 / 得分）：</p>
+  <table>
+    <tr><th>行</th><th>参数</th><th>测试结果</th><th>得分列</th></tr>
+    <tr><td>1</td><td>前静息 平均值</td><td><code>%.1f µV</code></td><td>score_rest</td></tr>
+    <tr><td>2</td><td>前静息 变异性</td><td><code>%.1f</code></td><td>score_rest</td></tr>
+    <tr><td>3</td><td>快速收缩 最大值</td><td><code>%.1f µV · %.1fx</code></td><td>score_force</td></tr>
+    <tr><td>4</td><td>快速收缩 上升时间</td><td><code>%.2f s</code></td><td>score_rise</td></tr>
+    <tr><td>5</td><td>快速收缩 恢复时间</td><td><code>%.2f s</code></td><td>score_recover</td></tr>
+    <tr><td>6</td><td>持续收缩 平均值</td><td><code>%.1f µV · %.1fx</code></td><td>score_endu</td></tr>
+    <tr><td>7</td><td>持续收缩 变异性</td><td><code>%.1f</code></td><td>score_sust</td></tr>
+    <tr><td>8</td><td>后静息 平均值</td><td><code>%.1f µV</code></td><td>score_rest</td></tr>
+    <tr><td>9</td><td>后静息 变异性</td><td><code>%.1f</code></td><td>score_rest</td></tr>
+  </table>
+  <ul>
+    <li>"参考值"列当前为<strong>空</strong>（因采用相对标定，无固定参考值）。</li>
+    <li>总分单独一行显示（0~100 分）。</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. 当前全部可调参数（都在 <code>eval_compute_score()</code> 一处）</h2>
+  <table>
+    <tr><th>参数</th><th>当前值</th><th>说明</th></tr>
+    <tr><td>力量满分倍数</td><td>10×</td><td><code>fast_max_ratio / 10</code></td></tr>
+    <tr><td>耐力满分倍数</td><td>5×</td><td><code>sust_ratio / 5</code></td></tr>
+    <tr><td>"真用力"门槛</td><td>2×</td><td><code>has_force = ratio ≥ 2.0</code></td></tr>
+    <tr><td>"真保持"门槛</td><td>1.5×</td><td><code>has_sust = ratio ≥ 1.5</code></td></tr>
+    <tr><td>上升满分 / 零分</td><td>0.5s / 2.0s</td><td><code>lin(fast_rise, 0.5, 2.0)</code></td></tr>
+    <tr><td>恢复满分 / 零分</td><td>1.0s / 3.0s</td><td><code>lin(fast_recover, 1.0, 3.0)</code></td></tr>
+    <tr><td>静息 CV 满分 / 零分</td><td>10% / 30%</td><td><code>lin(rest_cv, 10, 30)</code></td></tr>
+    <tr><td>保持 CV 满分 / 零分</td><td>10% / 30%</td><td><code>lin(sust_var, 10, 30)</code></td></tr>
+    <tr><td>六项权重</td><td>0.25/0.25/0.10/0.10/0.15/0.15</td><td>总分系数</td></tr>
+    <tr><td>上升/恢复检测阈值</td><td>2×基线（≥10µV）</td><td><code>eval_fast_sample</code></td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>7. 已知问题 / 待改进点（请重点评审）</h2>
+  <ol>
+    <li><strong>所有阈值都是"拍脑袋"初值</strong>，没有临床依据：10×/5×/2×/1.5×/0.5s/2s/1s/3s/10%/30% 都待专家确认或按人群数据标定。</li>
+    <li><strong>基线依赖前静息</strong>：若患者前静息没放松，基线偏高，所有"倍数"被系统性压低。</li>
+    <li><strong>静息稳定不设收缩门槛</strong>（有意保留）：因此"全程静止"的人静息稳定仍能得高分（≈96），这部分是否合理需确认。</li>
+    <li><strong>上升/恢复检测阈值 2×基线（≥10µV）</strong>：信号弱（基线极低）的人可能始终不触发，导致 fast_rise/recover = 0，目前靠 <code>has_force</code> 门控挡成 0 分，但语义上"测不到"和"真的很快"没区分。</li>
+    <li><strong>CV% 对低均值不稳定</strong>：均值 &lt; 0.5µV 直接记 0（当"完美稳定"），低信号时会虚高。</li>
+    <li><strong>无信号质量检测</strong>：没有电极脱落 / 接触不良 / 伪影检测，坏信号可能被当有效指标。</li>
+    <li><strong>持续收缩期简化</strong>：8s 的"用力保持"被当成单段统计均值/变异，内部的"用力1s+保持6s+放松1s"没有细分，也未评估"保持过程中是否掉力"。</li>
+    <li><strong>后静息没有显式"回到基线"检查</strong>：只统计均值/变异，没评估"用力后是否充分恢复"。</li>
+    <li><strong>总分是各分项独立加权</strong>，未考虑指标间相关性（如力量强的人恢复通常也快）。</li>
+    <li><strong>时间分辨率 50ms</strong>：对 ≤0.5s 的上升满分线够用，但若要更精细的爆发力指标（如 peak-to-peak 斜率），可能不够。</li>
+    <li><strong>采样点按"阶段已过 tick"对齐</strong>，未做段内时间归一（每段时长固定，暂无影响）。</li>
+  </ol>
+  <div class="callout">
+    <p><strong>供评审后回填</strong>：请给出 ① 各阈值/权重的临床建议值；② 是否需要新增指标（如快速收缩的"收缩次数/疲劳度/后静息是否回到基线"）；③ 评分曲线（线性/分段）是否合理。</p>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

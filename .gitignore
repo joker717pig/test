@@ -1,0 +1,23 @@
+# ESP-IDF 构建产物
+build/
+sdkconfig
+sdkconfig.old
+sdkconfig.defaults.*
+
+# 托管组件（idf_component.yml 自动下载）
+managed_components/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# IDE / 系统
+.vscode/
+.idea/
+*.swp
+
+# SPIFFS 资源目录 spiffs_data/ 已提交入库（同事 clone 即可构建 storage 镜像）
+
+# OTA 打包产物（tools/build_ota_package.py 生成）：已决定随仓库分发，
+# 同事 pull 即得最新升级包，避免误用老版本；同时仍走 FTP 上传云端。
+# eda_emg/

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDA_EMG OTA 正式发布说明（给同事）</title>
+<style>
+  :root {
+    --c-bg: #f7f8fa;
+    --c-card: #ffffff;
+    --c-text: #24292f;
+    --c-muted: #57606a;
+    --c-border: #d0d7de;
+    --c-accent: #0969da;
+    --c-accent-bg: #ddf4ff;
+    --c-th-bg: #f6f8fa;
+    --c-warn: #9a6700;
+    --c-warn-bg: #fff8c5;
+    --c-ok: #1a7f37;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    color: var(--c-text);
+    background: var(--c-bg);
+    margin: 0;
+    padding: 24px 16px 64px;
+    line-height: 1.7;
+  }
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  header.doc-header {
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  header.doc-header h1 {
+    margin: 0 0 8px;
+    font-size: 26px;
+    line-height: 1.3;
+  }
+  header.doc-header .meta {
+    color: var(--c-muted);
+    font-size: 13px;
+  }
+  header.doc-header .meta p { margin: 2px 0; }
+  header.doc-header code {
+    background: var(--c-th-bg);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+  }
+  section {
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    padding: 20px 28px;
+    margin-bottom: 20px;
+  }
+  h2 {
+    font-size: 19px;
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--c-border);
+  }
+  h3 { font-size: 16px; margin: 20px 0 10px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0; padding-left: 24px; }
+  li { margin: 4px 0; }
+  code {
+    font-family: "SF Mono", "Cascadia Code", Consolas, "Courier New", monospace;
+    background: var(--c-th-bg);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+  }
+  pre {
+    background: #0d1117;
+    color: #c9d1d9;
+    border-radius: 8px;
+    padding: 14px 18px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0;
+    font-size: 13.5px;
+  }
+  th, td {
+    border: 1px solid var(--c-border);
+    padding: 7px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--c-th-bg); font-weight: 600; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  .callout {
+    border-left: 4px solid var(--c-accent);
+    background: var(--c-accent-bg);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 14px 0;
+  }
+  .callout.warn {
+    border-left-color: #d4a72c;
+    background: var(--c-warn-bg);
+  }
+  .callout.danger {
+    border-left-color: #cf222e;
+    background: #ffebe9;
+  }
+  .callout p { margin: 4px 0; }
+  .small { font-size: 12.5px; color: var(--c-muted); }
+  .tag {
+    display: inline-block;
+    background: var(--c-accent-bg);
+    color: var(--c-accent);
+    border-radius: 999px;
+    padding: 1px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .tag.ok { background: #dafbe1; color: var(--c-ok); }
+  .tag.warn { background: var(--c-warn-bg); color: var(--c-warn); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="doc-header">
+  <h1>EDA_EMG OTA 正式发布说明</h1>
+  <div class="meta">
+    <p>更新时间：2026-09-08 · 目标读者：参与 EDA_EMG 固件发布 / 升级的同事</p>
+    <p>仓库：<code>EDA_EMG_ESP32</code>（ESP32 端）、<code>EDA_EMG</code>（STM32 端）</p>
+    <p>一句话：改版本号 → 编译 → 打包 → 传云端 → 设备联网升级，全程有脚本和版本号统一口径。</p>
+  </div>
+</header>
+
+<section>
+  <h2>0. 总览：一次正式发布要做什么</h2>
+  <ol>
+    <li>确认 <strong>测试开关已关闭</strong>（正式版走版本比较，不强制升级）。</li>
+    <li>给 <strong>三个目标</strong>（ESP32 / 图片 / STM32）中本次改动的 bump 版本号。</li>
+    <li><strong>编译</strong>出固件（ESP32 用 <code>idf.py build</code>；STM32 若改版本号要在 IAR 重新编译）。</li>
+    <li><strong>打包</strong>：跑脚本生成 <code>eda_emg/</code> 目录 + <code>version.json</code>。</li>
+    <li><strong>上传</strong>：把整个 <code>eda_emg/</code> 目录推到正式云端。</li>
+    <li><strong>设备验证</strong>：设备联网进 OTA 页，确认只对"云端版本 &gt; 本地版本"的目标提示更新并升级成功。</li>
+  </ol>
+  <div class="callout"><p>设备侧判定规则：<strong>仅当云端版本 &gt; 本地版本</strong> 才提示可升级；升级后两者相等，不再重复提示。所以"要发新版"=\n"改小对应固件的版本号再重新打包上传"。</p></div>
+</section>
+
+<section>
+  <h2>1. 发布前必查：测试开关</h2>
+  <p>位于 <code>main/ota/app_ota.c</code> 第 46 行附近：</p>
+  <pre><code>#define OTA_TEST_FORCE_UPGRADE  0</code></pre>
+  <table>
+    <tr><th>开关值</th><th>行为</th><th>适用场景</th></tr>
+    <tr><td><code>1</code>（测试）</td><td>跳过版本比较，只要拉到清单就把三目标全部标记"有更新"，强制完整升级</td><td>本地联调、上板验证升级链路</td></tr>
+    <tr><td><code>0</code>（正式）</td><td>走版本比较，仅当 云端版本 &gt; 本地版本 才升级</td><td><span class="tag ok">正式发布必须 0</span></td></tr>
+  </table>
+  <div class="callout danger"><p>⚠️ 正式发布前，务必确认 <code>OTA_TEST_FORCE_UPGRADE</code> 为 <code>0</code>。否则所有已是最新版的设备也会被强制重刷。</p></div>
+</section>
+
+<section>
+  <h2>2. 三个目标的版本号（口径必须统一）</h2>
+  <p>版本号统一用 <strong>两位 <code>主.次</code></strong>（内部 16 位 <code>0xMMmm</code>：高字节主、低字节次）。三处独立维护，只 bump 本次真正改动的目标。</p>
+  <table>
+    <tr><th>目标</th><th>版本号定义位置</th><th>当前值</th><th>云端校验方式</th></tr>
+    <tr>
+      <td>ESP32 固件</td>
+      <td><code>main/ota/app_ota.h</code> 里的 <code>APP_FW_VERSION</code></td>
+      <td><code>0x0200</code>（= 2.0）</td>
+      <td>sha256</td>
+    </tr>
+    <tr>
+      <td>图片资源（SPIFFS）</td>
+      <td><code>spiffs_data/image_ver.txt</code>（内容形如 <code>1.0</code>）</td>
+      <td><code>1.0</code></td>
+      <td>sha256</td>
+    </tr>
+    <tr>
+      <td>STM32 固件</td>
+      <td><code>D:\GitLab\EDA_EMG\code\MODBUS\MB_RegMap.h</code> 里的 <code>FW_VERSION</code></td>
+      <td><code>0x0100</code>（= 1.0）</td>
+      <td>crc32</td>
+    </tr>
+  </table>
+  <div class="callout warn"><p>注意区分 STM32 头文件里的两个宏：<code>MB_REG_FW_VERSION</code>（寄存器地址，勿动）与 <code>FW_VERSION</code>（实际版本号，发布时改它）。</p></div>
+  <h3>版本号 0xMMmm 规则</h3>
+  <ul>
+    <li>高字节 = 主版本，低字节 = 次版本；显示为 <code>主.次</code>。</li>
+    <li>例：<code>0x0201</code> → 显示 <code>2.1</code>；<code>0x0100</code> → <code>1.0</code>。</li>
+    <li>ESP32 版本号会被打包脚本从 <code>app_ota.h</code> 自动提取，不会写错——改源码即可。</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. 编译</h2>
+  <h3>3.1 ESP32 固件</h3>
+  <pre><code>cd D:\GitLab\EDA_EMG_ESP32
+idf.py build</code></pre>
+  <ul>
+    <li>产出：<code>build/eda_emg_esp32.bin</code>（OTA 用）与 <code>build/storage_a.bin</code>（图片资源）。</li>
+    <li>团队统一使用 <strong>ESP-IDF v5.5.3</strong> 工具链编译。</li>
+  </ul>
+  <h3>3.2 STM32 固件</h3>
+  <ul>
+    <li>若本次改了 <code>FW_VERSION</code>，需在 <strong>IAR</strong> 重新编译。</li>
+    <li>产出：<code>D:\GitLab\EDA_EMG\EWARM\EDA_EMG\Exe\EDA_EMG.hex</code>（打包脚本会转 bin）。</li>
+  </ul>
+</section>
+
+<section>
+  <h2>4. 打包</h2>
+  <p>在 <code>EDA_EMG_ESP32</code> 根目录执行：</p>
+  <pre><code>py tools/build_ota_package.py</code></pre>
+  <p>脚本仅依赖 Python 标准库，会自动：</p>
+  <ul>
+    <li>从源码自动提取版本号（<code>APP_FW_VERSION</code> / <code>image_ver.txt</code> / <code>FW_VERSION</code>），保证设备自报版本与云端一致。</li>
+    <li>生成 <code>eda_emg/</code> 目录与 <code>version.json</code>（含 sha256 / crc32 / size）。</li>
+    <li><strong>自动处理 STM32 目标</strong>：电脑上有 <code>EDA_EMG</code> 仓库且已编译出 hex，就重新打包 <code>stm32/</code> 目标（覆盖）；没有 STM32 源码时，若 <code>eda_emg/</code> 里<strong>已经存在</strong>上次生成好的 <code>stm32/fw.bin</code> 与 <code>version.json</code> 里的 stm32 条目，就<strong>原样沿用、不覆盖丢失</strong>；两者都没有才省略 stm32 项。设备端会自动跳过缺失的目标，不影响升级。</li>
+  </ul>
+  <div class="callout warn"><p>同事电脑通常<strong>没有 STM32 工程</strong>（<code>D:\GitLab\EDA_EMG</code> 不存在），直接跑 <code>py tools/build_ota_package.py</code> 即可：脚本会<strong>沿用已有的 stm32 信息</strong>（打印"沿用已有目标"），不会因为重跑就删掉原来 json 里已经有的 stm32 数据。需要发布新的 STM32 固件时，才在有 STM32 工程并编译好的机器上跑。</p></div>
+  <p>输出目录结构（有 STM32 时）：</p>
+  <pre><code>eda_emg/
+├── version.json
+├── esp32/eda_emg_esp32.bin
+├── image/storage_a.bin
+└── stm32/fw.bin</code></pre>
+  <p>同事电脑无 STM32 工程、但 <code>eda_emg/</code> 里已有旧 <code>stm32/</code> 目标时，<code>stm32</code> 条目会<strong>原样保留</strong>；只有从没有过 STM32 目标才会省略它。</p>
+  <p>三个目标版本号可独立指定（默认都按当前源码提取），需要临时指定时在终端加参数：</p>
+  <pre><code>py tools/build_ota_package.py --esp32-ver 0.1.0 --image-ver 0.1.0 --stm32-ver 0.1.0</code></pre>
+</section>
+
+<section>
+  <h2>5. 上传云端</h2>
+  <div class="callout"><p>正式云端地址（设备 OTA 读此清单）：<br>
+  <code>http://health.eda-global.cn/pelvicFloorMuscleUpgradeKit/fota/eda_emg/version.json</code></p></div>
+  <ul>
+    <li><strong>正式云端没有 FTP</strong>，需<strong>手动上传整个 <code>eda_emg/</code> 目录</strong>到上述路径（覆盖 <code>version.json</code> 及 <code>esp32/ image/ stm32/</code> 子目录）。</li>
+    <li>脚本里的 <code>--upload</code> 走的是旧测试服务器 FTP，仅联调时用，<strong>不是</strong>正式线路。</li>
+  </ul>
+  <div class="callout danger"><p>⚠️ 上传是覆盖生产云端，确认版本号与打包结果无误再传。</p></div>
+</section>
+
+<section>
+  <h2>6. 设备验证流程</h2>
+  <ol>
+    <li>设备联网，进入 OTA 升级页，点"检查更新"。</li>
+    <li>确认只有<strong>本次已 bump 版本的目标</strong>显示"有更新"（未改的目标应显示"已最新"）。</li>
+    <li>点升级，观察进度条；升级顺序为 <strong>STM32 → 图片 → ESP32</strong>。</li>
+    <li>全部完成后设备重启（图片切槽、ESP32 切 boot 分区、STM32 跳新 APP）。</li>
+    <li>再进 OTA 页检查一次，应显示"全为最新"，不再提示更新。</li>
+  </ol>
+</section>
+
+<section>
+  <h2>7. 常见坑（务必看）</h2>
+  <table>
+    <tr><th>#</th><th>现象 / 坑</th><th>处理</th></tr>
+    <tr>
+      <td>1</td>
+      <td><code>git pull</code> 后编译配置没生效（尤其内存相关配置）</td>
+      <td>删除本地根目录 <code>sdkconfig</code> 后再 build，IDF 会以 <code>sdkconfig.defaults</code> 重新生成</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>同事用不同 ESP-IDF 版本编译，导致 <code>dependencies.lock</code> / 行为不一致</td>
+      <td>团队统一 <strong>ESP-IDF v5.5.3</strong></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>只烧了 <code>app-flash</code>，图片资源（SPIFFS）缺失</td>
+      <td><code>app-flash</code> 不含 storage 资源，需<strong>全量 flash</strong>（app + storage 一起烧）</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>OTA 页面字库不对 / 缺字</td>
+      <td>重新生成 OTA 专用字库，见附录 8.2</td>
+    </tr>
+  </table>
+</section>
+
+<section>
+  <h2>8. 附录</h2>
+  <h3>8.1 测试开关与版本比较逻辑</h3>
+  <ul>
+    <li><code>OTA_TEST_FORCE_UPGRADE = 1</code>：强制全部升级（联调用），发布前必须改回 <code>0</code>。</li>
+    <li><code>= 0</code>：<code>app_ota_ver_compare(cloud, local) &gt; 0</code> 才升级。</li>
+  </ul>
+
+  <h3>8.2 重新生成 OTA 专用字库</h3>
+  <p>OTA 升级页使用 LVGL 子集字库 <code>spiffs_data/png/font/lv_font_OTA.bin</code>，若页面改文案出现缺字需重新生成：</p>
+  <pre><code>node tools/gen_ota_font.js</code></pre>
+  <div class="callout warn">
+    <p>首次跑会失败的常见原因：脚本 <code>tools/gen_ota_font.js</code> 第 11 行左右，<code>FONT_CONV</code> 被硬编码成了作者本机路径（形如 <code>C:/Users/lizhi/AppData/Local/npm-cache/_npx/.../lv_font_conv.js</code>）。</p>
+    <p>处理：改成<strong>你自己机器上 <code>lv_font_conv</code> 的全局路径</strong>（先安装 Node.js 与 <code>lv_font_conv</code>，用 <code>npm root -g</code> / <code>which lv_font_conv</code> 找到它）。</p>
+  </div>
+  <p>脚本关键参数：源字体 <code>C:/Windows/Fonts/simhei.ttf</code>；输出 <code>spiffs_data/png/font/lv_font_OTA.bin</code>；<code>--size 20 --bpp 4 --format bin -r 0x20-0x7F</code>。</p>
+</section>
+
+</div>
+</body>
+</html>

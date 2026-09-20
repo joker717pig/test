@@ -1,0 +1,18 @@
+# =====================================================================
+# EDA_EMG_ESP32 partition table (OTA: dual app + dual storage)
+# 16MB Flash layout:
+#   nvs 16KB | phy_init 4KB | otadata 8KB | ota_0 2MB | ota_1 2MB
+#   | storage_a ~5.97MB | storage_b ~5.97MB
+# - otadata (data/ota) REQUIRED by ESP-IDF OTA: records active boot slot
+# - storage_a/storage_b: dual SPIFFS image slots; active slot chosen by NVS key
+#   (app_spiffs.c), OTA flushes the *inactive* slot then flips the flag (D1)
+# NOTE: keep ASCII-only (read by Python tools, GBK-safe)
+# =====================================================================
+# Name,      Type, SubType, Offset,   Size,     Flags
+nvs,         data, nvs,     0x9000,   0x4000,
+phy_init,    data, phy,     0xd000,   0x1000,
+otadata,     data, ota,     0xe000,   0x2000,
+ota_0,       app,  ota_0,   0x10000,  0x200000,
+ota_1,       app,  ota_1,   0x210000, 0x200000,
+storage_a,   data, spiffs,  0x410000, 0x5F8000,
+storage_b,   data, spiffs,  0xA08000, 0x5F8000,

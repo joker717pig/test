@@ -1,0 +1,7 @@
+{
+  "targets": {
+    "esp32": { "version": "2.4", "url": "esp32/eda_emg_esp32.bin", "sha256": "f9e43885a53eb638886d750d4aad17ebff087acd4350890b462b27633f24cc71", "size": 1714768 },
+    "image": { "version": "1.2", "url": "image/storage_a.bin", "sha256": "40809da67fedae8a37bb5ea40b41d6978eb1b64a85d545146773679ce1948b10", "size": 6258688 },
+    "stm32": { "version": "1.2", "url": "stm32/fw.bin", "crc32": "ed1304b1", "size": 53248 }
+  }
+}

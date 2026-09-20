@@ -1,0 +1,117 @@
+# =====================================================================
+# EDA_EMG_ESP32 stage 0.D: ST7365 LCD pin/param config (Kconfig)
+# Wiring from sEMG-V1.4 schematic (user verified, 2026-08-07)
+#   ESP32-S3-WROOM-1-N16R8 -> 12P panel connector (ST7365 320x480, 4WSPI)
+#   SPI2(FSPI) pins are the default mapping: SCK=12, MOSI=11, MISO=13, CS=10, DC=9, TE=14
+# NOTE: keep this file ASCII-only so kconfgen works on any Windows locale (GBK/UTF-8)
+# =====================================================================
+menu "ST7365 LCD Display (stage 0.D)"
+
+    config LCD_SPI_HOST_ID
+        int "SPI host ID (enum: 1 = SPI2/FSPI, 2 = SPI3/HSPI)"
+        default 1
+        range 1 2
+        help
+            Panel is on ESP32-S3 SPI2(FSPI); pins match the default mapping
+            (SCK=12, MOSI=11, MISO=13, CS=10, HD=9, WP=14).
+            Enum values: SPI2_HOST=1, SPI3_HOST=2.
+
+    config LCD_SPI_CLK_HZ
+        int "SPI clock (Hz)"
+        default 80000000
+        range 1000000 80000000
+        help
+            ESP32-S3 SPI2 max 80MHz. ST7365 typically ~50MHz; lower this
+            (e.g. 60000000 / 50000000) if the screen glitches. Use the
+            console 'bench' command to measure real frame rate.
+
+    config LCD_PIN_SCK
+        int "SCK / SCL (SPI clock) GPIO"
+        default 12
+
+    config LCD_PIN_MOSI
+        int "MOSI / SDA (SPI data out) GPIO"
+        default 11
+
+    config LCD_PIN_MISO
+        int "MISO / SDO (SPI data in, readback, -1 = unused) GPIO"
+        default 13
+
+    config LCD_PIN_CS
+        int "CS (chip select) GPIO"
+        default 10
+
+    config LCD_PIN_DC
+        int "DC (command/data) GPIO"
+        default 9
+
+    config LCD_PIN_RST
+        int "RESET GPIO"
+        default 21
+
+    config LCD_PIN_BL
+        int "Backlight LED_PWM GPIO (-1 = always on)"
+        default 3
+
+    config LCD_PIN_TE
+        int "TE (tearing, -1 = unused) GPIO"
+        default -1
+
+    config LCD_H_RES
+        int "Logical horizontal resolution (landscape, px)"
+        default 480
+
+    config LCD_V_RES
+        int "Logical vertical resolution (landscape, px)"
+        default 320
+
+endmenu
+
+# =====================================================================
+# EDA_EMG_ESP32 stage A: Modbus RTU master config
+# Wiring (user confirmed 2026-08-10, supersedes schematic inference):
+#   MCU_U3_RX = IO17 (ESP32 TX) -> STM32 PA3 (USART2_RX)
+#   MCU_U3_TX = IO18 (ESP32 RX) <- STM32 PA2 (USART2_TX)
+#   i.e. ESP32-S3 UART1 default pins TX=17/RX=18, 115200 8N1
+# =====================================================================
+menu "Modbus RTU Master (stage A)"
+
+    config MODBUS_UART_NUM
+        int "UART number (0/1/2)"
+        default 1
+        help
+            ESP32-S3 has UART0/1/2. Console uses USB-Serial-JTAG; this
+            module uses UART1 (default pins 17/18 = schematic MCU_U3 wiring).
+
+    config MODBUS_UART_TX
+        int "UART TX GPIO"
+        default 17
+
+    config MODBUS_UART_RX
+        int "UART RX GPIO"
+        default 18
+
+    config MODBUS_BAUD
+        int "Baud rate (bps)"
+        default 115200
+
+    config MODBUS_SLAVE_ID
+        int "Slave address (hex)"
+        default 1
+
+    config MODBUS_RESP_TIMEOUT_MS
+        int "Response timeout (ms)"
+        default 150
+
+    config MODBUS_RETRIES
+        int "Retries per transaction"
+        default 3
+
+    config MODBUS_FRAME_GAP_MS
+        int "Inter-frame gap (ms)"
+        default 5
+        help
+            Modbus RTU inter-frame idle detection (3.5T @115200 ~ 0.35ms);
+            use 5ms margin, aligned with slave MB_FRAME_TIMEOUT_MS.
+
+endmenu
