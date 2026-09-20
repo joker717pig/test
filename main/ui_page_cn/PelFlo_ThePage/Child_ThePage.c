@@ -351,6 +351,10 @@ void Child_ThePage_Load(ChiThePage_ID_t page_id)
         The_Param_Data1.Value_Freq = therapy_cur_freq(&g_rx_all[RX_3]->schemes[schemes_idx],1);
         The_Param_Data1.Value_Pulse = therapy_cur_pw(&g_rx_all[RX_3]->schemes[schemes_idx],1);
         ThePage4_widget(&The_Param_Data1, g_Ui.page_container);
+        lv_group_t* g = app_keypad_get_group();
+       if (g && lv_obj_is_valid(The_Param_Data1.Plu_Btn)) {
+        lv_group_focus_obj(The_Param_Data1.Plu_Btn);
+        }
         audio_play_request(VOICE_ID_MAX_INTENSITY_CN,1500);              //语音播放：调节强度
         break;
     case ChiThePage_Treat:
@@ -490,23 +494,11 @@ static void ThePage_Page4_Key_cb(lv_event_t* e)
     uint32_t key = lv_event_get_key(e);
     Param_Data_t* data = (Param_Data_t*)lv_event_get_user_data(e);
 
-    if (key == LV_KEY_ESC) { Child_ThePage_Load(ChiThePage_TreIns); return; }   /* 删对象路径 */
-
-    // /* 左右 = 调档位（滑条值 ±1） */
-    // if (key == LV_KEY_LEFT || key == LV_KEY_RIGHT) {
-    //     int32_t v = lv_slider_get_value(data->Slider);
-    //     v += (key == LV_KEY_RIGHT) ? 1 : -1;
-    //     if (v < 0) v = 0;
-    //     if (v > 90) v = 90;
-    //     lv_slider_set_value(data->Slider, v, LV_ANIM_OFF);
-    //     /* [我们] LVGL9.5 lv_slider_set_value(ANIM_OFF) 不发 VALUE_CHANGED（lv_bar.c 确认），
-    //      * 手动更新强度值 + 标签（同 Child_Slider_Event_cb VALUE_CHANGED 分支） */
-    //     if (data->Value_Stage == 1)      data->Value_Intens1 = v;
-    //     else if (data->Value_Stage == 2) data->Value_Intens2 = v;
-    //     if (lv_obj_is_valid(data->Label_Intens)) lv_label_set_text_fmt(data->Label_Intens, "%d", (int)v);
-    //     lv_event_stop_processing(e);   /* 调值分支非删对象，stop 无害（坑 B3-3 只禁删对象路径） */
-    //     return;
-    // }
+    if (key == LV_KEY_ESC) { 
+        therapy_forced_stop();
+        Child_ThePage_Load(ChiThePage_TreIns); 
+        return; 
+    }   /* 删对象路径 */
 
     /* 上下 = 线性焦点链：Min -> Plu -> Set */
     if (key == LV_KEY_UP) {
@@ -517,11 +509,25 @@ static void ThePage_Page4_Key_cb(lv_event_t* e)
         else if (obj == data->Plu_Btn) lv_group_focus_obj(data->Set_Btn);
     }
 
-    else if (key == LV_KEY_LEFT) {
+    /*else if (key == LV_KEY_LEFT) {
         if (obj == data->Plu_Btn) lv_group_focus_obj(data->Min_Btn);
     }
     else if (key == LV_KEY_RIGHT) {
         if (obj == data->Min_Btn) lv_group_focus_obj(data->Plu_Btn);
+    }*/
+    else if (key == LV_KEY_LEFT) {
+        if (data->Min_Btn) {
+            lv_group_focus_obj(data->Min_Btn);                       /* 先移焦点 */
+            lv_obj_send_event(data->Min_Btn, LV_EVENT_CLICKED, NULL); /* 再执行减 */
+            lv_event_stop_processing(e);   /* 阻止 group 再做左右切焦点 */
+        }
+    }
+    else if (key == LV_KEY_RIGHT) {
+        if (data->Plu_Btn) {
+            lv_group_focus_obj(data->Plu_Btn);                       /* 先移焦点 */
+            lv_obj_send_event(data->Plu_Btn, LV_EVENT_CLICKED, NULL); /* 再执行加 */
+            lv_event_stop_processing(e);
+        }
     }
 }
 
@@ -698,10 +704,15 @@ static void ThePage4_widget(Param_Data_t* param, lv_obj_t* page_cont)
     The_GroupRegister(param->Min_Btn);
     The_GroupRegister(param->Plu_Btn);
     The_GroupRegister(param->Set_Btn);
-    lv_group_focus_obj(param->Set_Btn);
+    //lv_group_focus_obj(param->Plu_Btn);
     lv_obj_add_event_cb(param->Min_Btn, ThePage_Page4_Key_cb, LV_EVENT_KEY, param);
     lv_obj_add_event_cb(param->Plu_Btn, ThePage_Page4_Key_cb, LV_EVENT_KEY, param);
     lv_obj_add_event_cb(param->Set_Btn, ThePage_Page4_Key_cb, LV_EVENT_KEY, param);
+    lv_group_focus_obj(param->Plu_Btn);
+    lv_group_t* g = app_keypad_get_group();
+    if (g && lv_obj_is_valid(param->Plu_Btn)) {
+        lv_group_focus_obj(param->Plu_Btn);
+    }
 }
 
 /**

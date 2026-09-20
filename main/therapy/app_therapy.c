@@ -840,11 +840,11 @@ void therapy_resume(void)
     ui_sync();
     ESP_LOGI(TAG, "resume");
 }
-void my_therapy_resume(void)
+/* 无条件强制停波 */
+void therapy_forced_stop(void)
 {
-    if (s_th.session != TH_PAUSED) return;
-    s_th.session = TH_RUNNING;
-    ESP_LOGI(TAG, "resume");
+    wave_stop();
+    ESP_LOGI(TAG, "forced stop");
 }
 void therapy_stop(void)
 {

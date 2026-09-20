@@ -13,6 +13,7 @@
 #include "voice.h"
 #include "emg_force.h"     /* 阶段 3.3: 实时力度包络 */
 #include "emg_dsp.h"       /* EMG_DSP_RAW16_LSB_UV 换算 */
+#include "app_keypad.h"
 
 static const char *TAG = "TheChild_evt";
 #define FILTER_WIN 7  // 滑动窗口大小（3~7 效果较好）
@@ -217,6 +218,11 @@ void ChildPage_P4SetBtn_Event_cb(lv_event_t* e)
                 lv_label_set_text_fmt(data->Label_Freq, "%dHz",data->Value_Freq);
                 lv_label_set_text_fmt(data->Label_Pulse, "%duS",data->Value_Pulse);
                 therapy_send_intensity(0,data->Value_Freq,data->Value_Pulse);
+
+                lv_group_t* g = app_keypad_get_group();
+                if (g && lv_obj_is_valid(data->Plu_Btn)) {
+                lv_group_focus_obj(data->Plu_Btn);
+               }
             }
             else if (strcmp(lv_label_get_text(data->Label_Set), "设置完成，进入治疗") == 0) { // 跳转到下一页
                 therapy_send_intensity(0,data->Value_Freq,data->Value_Pulse);

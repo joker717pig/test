@@ -370,7 +370,7 @@ static void PosReh_En_Page4_widget(Param_Data_t* param, lv_obj_t* page_cont)
     lv_obj_add_event_cb(param->Min_Btn, PosReh_En_Page4_Key_cb, LV_EVENT_KEY, param);
     lv_obj_add_event_cb(param->Plu_Btn, PosReh_En_Page4_Key_cb, LV_EVENT_KEY, param);
     lv_obj_add_event_cb(param->Set_Btn, PosReh_En_Page4_Key_cb, LV_EVENT_KEY, param);
-    lv_group_focus_obj(param->Set_Btn);
+    lv_group_focus_obj(param->Plu_Btn);
 }
 
 /**

@@ -79,6 +79,7 @@ void therapy_stop(void);
  *        任何页面路径漏停都在此兜住。幂等，可重复调用。
  */
 void therapy_emergency_stop(void);
+void therapy_forced_stop(void);
 
 void my_therapy_pause(void);
 void my_therapy_resume(void);

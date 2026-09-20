@@ -477,12 +477,27 @@ static void MaiPage_Page4_Key_cb(lv_event_t* e)
         else if (obj == data->Plu_Btn) lv_group_focus_obj(data->Set_Btn);
     }
 
-    else if (key == LV_KEY_LEFT) {
+   /* else if (key == LV_KEY_LEFT) {
         if (obj == data->Plu_Btn) lv_group_focus_obj(data->Min_Btn);
     }
     else if (key == LV_KEY_RIGHT) {
         if (obj == data->Min_Btn) lv_group_focus_obj(data->Plu_Btn);
+    } */
+   else if (key == LV_KEY_LEFT) {
+        if (data->Min_Btn) {
+            lv_group_focus_obj(data->Min_Btn);                       /* 先移焦点 */
+            lv_obj_send_event(data->Min_Btn, LV_EVENT_CLICKED, NULL); /* 再执行减 */
+            lv_event_stop_processing(e);   /* 阻止 group 再做左右切焦点 */
+        }
     }
+    else if (key == LV_KEY_RIGHT) {
+        if (data->Plu_Btn) {
+            lv_group_focus_obj(data->Plu_Btn);                       /* 先移焦点 */
+            lv_obj_send_event(data->Plu_Btn, LV_EVENT_CLICKED, NULL); /* 再执行加 */
+            lv_event_stop_processing(e);
+        }
+    }
+
 }
 
 /* Page5 治疗中：LEFT/RIGHT 切焦点（同治疗格），ENTER 由 ChildPage_P5Btn_Event_cb 处理，ESC=返回确认 */
@@ -660,7 +675,7 @@ static void MaiPage4_widget(Param_Data_t* param, lv_obj_t* page_cont)
     Mai_GroupRegister(param->Min_Btn);
     Mai_GroupRegister(param->Plu_Btn);
     Mai_GroupRegister(param->Set_Btn);
-    lv_group_focus_obj(param->Set_Btn);
+    lv_group_focus_obj(param->Plu_Btn);
     lv_obj_add_event_cb(param->Min_Btn, MaiPage_Page4_Key_cb, LV_EVENT_KEY, param);
     lv_obj_add_event_cb(param->Plu_Btn, MaiPage_Page4_Key_cb, LV_EVENT_KEY, param);
     lv_obj_add_event_cb(param->Set_Btn, MaiPage_Page4_Key_cb, LV_EVENT_KEY, param);

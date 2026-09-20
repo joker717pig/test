@@ -235,6 +235,10 @@ void ChildPage_P4SetBtn_En_Event_cb(lv_event_t* e)
                 lv_slider_set_value(data->Slider, 0, LV_ANIM_OFF);          //初始化滑动条值为0
                 lv_label_set_text(data->Label_Intens, "0");
                 therapy_send_intensity(0,data->Value_Freq,data->Value_Pulse);
+                lv_group_t* g = app_keypad_get_group();
+                if (g && lv_obj_is_valid(data->Plu_Btn)) {
+                    lv_group_focus_obj(data->Plu_Btn);
+                }
             }
             else if (strcmp(lv_label_get_text(data->Label_Set), "Setup Complete, Start") == 0) {
                 therapy_send_intensity(0,data->Value_Freq,data->Value_Pulse);
